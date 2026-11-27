@@ -1,6 +1,6 @@
 # Procurement Resource: User Panel
 
-[![CI](https://github.com/Ankush-Frntd-Dev13/demo-pr-user-panel/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Ankush-Frntd-Dev13/demo-pr-user-panel/actions/workflows/ci.yml)
+[![CI](https://github.com/Abhi4494/user-panel-of-pr/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Abhi4494/user-panel-of-pr/actions/workflows/ci.yml)
 
 Migration of the logged-in user panel of procurementresource.com to React + Node.js (login, registration, dashboard and report screens).
 
@@ -21,4 +21,4 @@ npm run build          # production build of the client
 
 ## Branches
 
-Work happens on `ankush`; after checking it, it is promoted to `main`, which Vercel deploys.
+`main` is the branch Vercel deploys.
