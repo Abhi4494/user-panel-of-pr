@@ -1,0 +1,31 @@
+name: CI
+on:
+  push:
+    branches: [ankush, main]
+  pull_request:
+    branches: [main]
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v7
+      - name: Install Node 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install packages
+        run: npm ci
+      - name: Typecheck (client + server)
+        run: npm run typecheck
+      - name: Lint (client)
+        run: npm run lint
+      - name: Test (client)
+        run: npm test
+      - name: Build the client
+        run: npm run build

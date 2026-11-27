@@ -1,0 +1,24 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+coverage/
+
+# Local-only project files (kept on disk, never pushed)
+docs/
+push.sh
+CLAUDE.md
+.claude/
+
+# Tooling / OS / editor noise
+.vercel/
+.idea/
+Thumbs.db
+*.pem
+.gitattributes

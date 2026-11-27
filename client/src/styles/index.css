@@ -1,0 +1,430 @@
+@import 'tailwindcss';
+
+/*
+ * Design tokens. Values are taken from the reference site's login.css / pr_custom.css /
+ * parsley.css — see docs/design-system.md before changing them.
+ */
+@theme {
+  /* Breakpoints mirror the reference's Bootstrap 4 grid (md 768 is already Tailwind's default). */
+  --breakpoint-lg: 62rem; /* 992px */
+  --breakpoint-nav: 64rem; /* 1024px: the dashboard sidebar becomes a drawer below this (drawer up to 1023px) */
+  --breakpoint-xl: 75rem; /* 1200px */
+
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; /* eyebrow / credit labels */
+  /* Single switch for every heading (h1–h6 render through <Heading>). Change this one line to restyle all. */
+  --font-heading: 'Lora Variable', Georgia, 'Times New Roman', serif;
+
+  /* Type scale used by <Heading size="…"> and display copy. */
+  --text-display: clamp(1.625rem, 1rem + 1.4vw, 2.25rem);
+  --text-headline: clamp(1.375rem, 1rem + 0.9vw, 1.75rem);
+  --text-title: clamp(1.25rem, 1rem + 0.5vw, 1.5rem);
+  /* The one oversized figure on the PCR dashboard ("10+", 72px on the reference). Fluid so it shrinks on phones. */
+  --text-hero-number: clamp(2.75rem, 1.6rem + 3.2vw, 4.5rem);
+  --text-eyebrow: 0.6875rem;
+  --text-caption: 0.75rem;
+
+  /* Modern auth surfaces (registration screen). */
+  --color-page-start: #f1f3fc; /* page background gradient */
+  --color-page-end: #e9e4f9;
+  --color-accent: #4452c4; /* links, checkbox, focus ring */
+  --color-accent-soft: #a9b4f4; /* primary button resting/disabled tint */
+  --color-accent-strong: #343fa3; /* primary button hover */
+  --color-ink-strong: #0b0d1f; /* modern headings */
+  --color-muted: #5b6078; /* secondary text */
+  --color-soft-field: #f5f6fc; /* soft input background */
+  --color-soft-border: #e2e5f3;
+  --color-soft-placeholder: #9ca1bd;
+  --color-panel-start: #0d1450; /* marketing panel gradient */
+  --color-panel-end: #4a2fa0;
+
+  --color-panel-glow: #5b6cf0; /* soft corner glow on the panel */
+  --spacing-grid: 2.5rem; /* panel grid cell size */
+
+  --shadow-card: 0 20px 50px -20px rgb(13 20 80 / 25%);
+  --shadow-dash-card: 0 2px 8px rgb(0 0 0 / 9%); /* soft edge of the white dashboard cards (measured on prod) */
+
+  --color-brand: #010534; /* primary navy: buttons, links, focus border, panel base */
+  --color-brand-overlay: rgb(0 34 102 / 83%); /* panel tint laid over brand */
+  --color-ink: #1c1f21; /* headings */
+  --color-body: #646464; /* default text, labels */
+  --color-copy: #333e48; /* paragraphs */
+  --color-field-text: #495057;
+  --color-field-border: #efefef;
+  --color-alert: #db1313; /* form-level error message */
+  --color-disabled: #a3a3a3;
+  --color-invalid-text: #b94a48;
+  --color-invalid-bg: #f2dede;
+  --color-invalid-border: #eed3d7;
+  --color-valid-text: #468847;
+  --color-valid-bg: #dff0d8;
+  --color-valid-border: #d6e9c6;
+
+  /* Screen-to-screen content fade (opacity only; see FadeIn). */
+  --animate-fade-in: fade-in 220ms ease-out both;
+
+  /*
+   * Page loader circle (measured from the reference recording): 60px white dot that shrinks to ~3px in ~0.5s (accelerating)
+   * while dimming, then grows linearly to ~3x while fading out, ~1.2s per cycle, looping while the page loads.
+   */
+  --animate-loader-pulse: loader-pulse 1.2s linear infinite;
+
+  @keyframes loader-pulse {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+      animation-timing-function: ease-in;
+    }
+    45% {
+      transform: scale(0.05);
+      opacity: 0.35;
+      animation-timing-function: linear;
+    }
+    100% {
+      transform: scale(3);
+      opacity: 0;
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
+
+/*
+ * Dashboard (logged-in area) theme. Light is the default; `<html data-theme="dark">` swaps the values below.
+ * Components only use the generated `dash-*` utilities (bg-dash-surface, text-dash-muted, ...), never raw colours,
+ * so the whole dashboard re-themes from here. Auth screens ignore these tokens.
+ */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+:root {
+  /* Light values sampled from the reference dashboard (header, cards, rail, page). */
+  --dash-hero: #002266; /* navy curved header (same in both themes) */
+  --dash-bg: #ffffff; /* page background */
+  --dash-surface: #ffffff; /* menu panel, inputs, raised surfaces */
+  --dash-rail: #f9f9f9; /* icon rail */
+  --dash-line: #e2e5f3; /* borders, dividers */
+  --dash-text: #0b0d1f; /* headings, strong text */
+  --dash-muted: #5b6078; /* secondary text */
+  --dash-faint: #8a8fab; /* placeholders, inactive rail labels */
+  /* Sidebar (rail + menu) colours, sampled from the reference. */
+  --dash-nav-title: #283252; /* menu header title, section labels */
+  --dash-nav-active: #002266; /* selected rail item, primary "Home" link, selected link */
+  --dash-nav-idle: #a2a5b9; /* menu links, rail labels */
+  --dash-nav-icon: #a9abac; /* rail icons (idle) */
+  --dash-nav-line: #d9d9d9; /* dividers between menu sections */
+  --dash-nav-badge: #e7e2f0; /* round initial badge in the menu header */
+  --dash-nav-badge-text: #8269b2;
+  --dash-hover: #e8ebf9; /* hover background */
+  --dash-active: #dfe4fb; /* selected item background */
+  --dash-accent: #4452c4; /* selected item text/indicator, focus ring */
+  /* Content colours used inside dashboard pages (Price Trends etc.), sampled from the reference. */
+  --dash-ink: #283252; /* numbers, headings, product names */
+  --dash-strong: #232326; /* "Subscribed Products" title */
+  --dash-subtle: #a2a5b9; /* captions, secondary lines */
+  --dash-hairline: #e5e5e5; /* card borders, stat dividers */
+  --dash-outline: #002266; /* outlined chips */
+  --dash-accent-line: #003399; /* vertical divider in the subscription card */
+  --dash-chip: #232326; /* dark chips and the Manage button */
+  --dash-chip-text: #ffffff;
+  --dash-pill: #f5f5f5; /* "Subscribed" status pill */
+  --dash-pill-text: #4a4a4a;
+  /* Chart page (Product Graph), sampled from the reference. */
+  --dash-chart-card: #f9f8ff; /* chart card background */
+  --dash-chart-axis: #7f90b2; /* axis labels */
+  --dash-chart-grid: #e6e9f0; /* horizontal gridlines */
+  --dash-chart-line: #010534; /* price line, legend dot, navigator area */
+  --dash-chart-icon: #6e8192; /* zoom +/- and menu icons */
+  --dash-control-border: #dbdbdb; /* toolbar buttons, tab baseline */
+  --dash-control-icon: #3a3a3a; /* toolbar icons */
+  --dash-tab-idle: #cecece; /* inactive tab label */
+  --dash-divider: #ededed; /* rows inside the price-change card */
+  --dash-window-fill: #e4e3ea; /* navigator selection */
+  --dash-window-line: #bdbec4;
+  /* Production Cost Report screens, sampled from the reference. */
+  --dash-panel-soft: #f5f6fa; /* "Recent Cost Models" panel, search field */
+  --dash-placeholder: #bbbcbf;
+  --dash-badge-category: #ffa981; /* category pill on report cards (white text) */
+  --dash-btn-dark: #363636; /* date pill, "View" button (white text) */
+  --dash-input-border: #767676; /* the reports search box on the navy header */
+  --dash-avatar-head: #fbba84; /* little person icon on cost-model cards */
+  --dash-avatar-body: #4a79bd;
+  /* Industry Reports screen (report cover placeholder), sampled from the reference. */
+  --dash-cover-bg: #cccccc;
+  --dash-cover-fg: #989898;
+  /* Discussion Forum cards, sampled from the reference. */
+  /* Cost model row actions (tinted background + text), sampled from the reference. */
+  --dash-act-add-bg: #ebfef9;
+  --dash-act-add: #04906c;
+  --dash-act-edit-bg: #fef6eb;
+  --dash-act-edit: #905604;
+  --dash-act-detail-bg: #ebf8ff;
+  --dash-act-detail: #0385c4;
+  --dash-act-delete-bg: #fdedf2;
+  --dash-act-delete: #d21953;
+  --dash-pick-industry: #faae42; /* search panel: industry / sub category squares */
+  --dash-pick-product: #06d6a0; /* search panel: product squares */
+  --dash-forum-tag: #e62965; /* topic chip */
+  --dash-forum-date: #363636; /* date chip */
+  --dash-forum-avatar: #b6b6b6; /* author silhouette */
+  /* Page-to-page loader, measured from the reference recording (docs/loader.mp4). */
+  --dash-loader-bg: #ececec; /* overlay over the whole main area */
+  --dash-loader-dot: #ffffff; /* the pulsing circle */
+  --dash-tile: #000000; /* icon tile on stat cards */
+  --dash-tile-fg: #ffffff;
+  --dash-online: #22c55e; /* presence dot */
+  --dash-tint-mint: #ebfdee; /* stat card tints */
+  --dash-tint-rose: #ffebf1;
+  --dash-tint-peach: #ffefe7;
+  --dash-tint-sky: #e8f0fb;
+}
+:root[data-theme='dark'] {
+  --dash-bg: #090c1b;
+  --dash-surface: #11152f;
+  --dash-rail: #0d1126;
+  --dash-line: #222850;
+  --dash-text: #eceefb;
+  --dash-muted: #a3a9c9;
+  --dash-faint: #6f7599;
+  --dash-nav-title: #e4e7f7;
+  --dash-nav-active: #8b97f5; /* navy would vanish on the dark panel */
+  --dash-nav-idle: #8087a8;
+  --dash-nav-icon: #6f7599;
+  --dash-nav-line: #222850;
+  --dash-nav-badge: #232a5c;
+  --dash-nav-badge-text: #b9a7ee;
+  --dash-hover: #1a1f42;
+  --dash-active: #232a5c;
+  --dash-accent: #8b97f5;
+  --dash-ink: #e4e7f7;
+  --dash-strong: #eceefb;
+  --dash-subtle: #8087a8;
+  --dash-hairline: #222850;
+  --dash-outline: #8b97f5;
+  --dash-accent-line: #8b97f5;
+  --dash-chip: #323867;
+  --dash-chip-text: #ffffff;
+  --dash-pill: #1a1f42;
+  --dash-pill-text: #c3c8e4;
+  --dash-chart-card: #151a38;
+  --dash-chart-axis: #8a93b8;
+  --dash-chart-grid: #232850;
+  --dash-chart-line: #aeb8ff;
+  --dash-chart-icon: #9aa3c0;
+  --dash-control-border: #2b3160;
+  --dash-control-icon: #c3c8e4;
+  --dash-tab-idle: #4b5283;
+  --dash-divider: #222850;
+  --dash-window-fill: #232a5c;
+  --dash-window-line: #3a4175;
+  --dash-panel-soft: #151a38;
+  --dash-placeholder: #5b6390;
+  --dash-badge-category: #c9774f;
+  --dash-btn-dark: #323867;
+  --dash-input-border: #3a4175;
+  --dash-avatar-head: #fbba84;
+  --dash-avatar-body: #6f93d6;
+  --dash-cover-bg: #2a3066;
+  --dash-cover-fg: #6f7599;
+  --dash-act-add-bg: #0f2a2a;
+  --dash-act-add: #4fd6b0;
+  --dash-act-edit-bg: #2b2415;
+  --dash-act-edit: #e8b25a;
+  --dash-act-detail-bg: #11263a;
+  --dash-act-detail: #6cc3f2;
+  --dash-act-delete-bg: #2e1822;
+  --dash-act-delete: #f4789f;
+  --dash-pick-industry: #e39a35;
+  --dash-pick-product: #12b88c;
+  --dash-forum-tag: #d6336c;
+  --dash-forum-date: #3a4073;
+  --dash-forum-avatar: #6f7599;
+  --dash-loader-bg: #0e1228;
+  --dash-loader-dot: #2b3262;
+  --dash-tile: #eceefb;
+  --dash-tile-fg: #0b0d1f;
+  --dash-online: #34d399;
+  --dash-tint-mint: #12281f;
+  --dash-tint-rose: #2b1724;
+  --dash-tint-peach: #2b1f17;
+  --dash-tint-sky: #171f40;
+}
+
+@theme inline {
+  --color-dash-hero: var(--dash-hero);
+  --color-dash-bg: var(--dash-bg);
+  --color-dash-surface: var(--dash-surface);
+  --color-dash-rail: var(--dash-rail);
+  --color-dash-line: var(--dash-line);
+  --color-dash-text: var(--dash-text);
+  --color-dash-muted: var(--dash-muted);
+  --color-dash-faint: var(--dash-faint);
+  --color-dash-nav-title: var(--dash-nav-title);
+  --color-dash-nav-active: var(--dash-nav-active);
+  --color-dash-nav-idle: var(--dash-nav-idle);
+  --color-dash-nav-icon: var(--dash-nav-icon);
+  --color-dash-nav-line: var(--dash-nav-line);
+  --color-dash-nav-badge: var(--dash-nav-badge);
+  --color-dash-nav-badge-text: var(--dash-nav-badge-text);
+  --color-dash-hover: var(--dash-hover);
+  --color-dash-active: var(--dash-active);
+  --color-dash-accent: var(--dash-accent);
+  --color-dash-ink: var(--dash-ink);
+  --color-dash-strong: var(--dash-strong);
+  --color-dash-subtle: var(--dash-subtle);
+  --color-dash-hairline: var(--dash-hairline);
+  --color-dash-outline: var(--dash-outline);
+  --color-dash-accent-line: var(--dash-accent-line);
+  --color-dash-chip: var(--dash-chip);
+  --color-dash-chip-text: var(--dash-chip-text);
+  --color-dash-pill: var(--dash-pill);
+  --color-dash-pill-text: var(--dash-pill-text);
+  --color-dash-chart-card: var(--dash-chart-card);
+  --color-dash-chart-axis: var(--dash-chart-axis);
+  --color-dash-chart-grid: var(--dash-chart-grid);
+  --color-dash-chart-line: var(--dash-chart-line);
+  --color-dash-chart-icon: var(--dash-chart-icon);
+  --color-dash-control-border: var(--dash-control-border);
+  --color-dash-control-icon: var(--dash-control-icon);
+  --color-dash-tab-idle: var(--dash-tab-idle);
+  --color-dash-divider: var(--dash-divider);
+  --color-dash-window-fill: var(--dash-window-fill);
+  --color-dash-window-line: var(--dash-window-line);
+  --color-dash-panel-soft: var(--dash-panel-soft);
+  --color-dash-placeholder: var(--dash-placeholder);
+  --color-dash-badge-category: var(--dash-badge-category);
+  --color-dash-btn-dark: var(--dash-btn-dark);
+  --color-dash-input-border: var(--dash-input-border);
+  --color-dash-avatar-head: var(--dash-avatar-head);
+  --color-dash-avatar-body: var(--dash-avatar-body);
+  --color-dash-cover-bg: var(--dash-cover-bg);
+  --color-dash-cover-fg: var(--dash-cover-fg);
+  --color-dash-act-add-bg: var(--dash-act-add-bg);
+  --color-dash-act-add: var(--dash-act-add);
+  --color-dash-act-edit-bg: var(--dash-act-edit-bg);
+  --color-dash-act-edit: var(--dash-act-edit);
+  --color-dash-act-detail-bg: var(--dash-act-detail-bg);
+  --color-dash-act-detail: var(--dash-act-detail);
+  --color-dash-act-delete-bg: var(--dash-act-delete-bg);
+  --color-dash-act-delete: var(--dash-act-delete);
+  --color-dash-pick-industry: var(--dash-pick-industry);
+  --color-dash-pick-product: var(--dash-pick-product);
+  --color-dash-forum-tag: var(--dash-forum-tag);
+  --color-dash-forum-date: var(--dash-forum-date);
+  --color-dash-forum-avatar: var(--dash-forum-avatar);
+  --color-dash-loader-bg: var(--dash-loader-bg);
+  --color-dash-loader-dot: var(--dash-loader-dot);
+  --color-dash-tile: var(--dash-tile);
+  --color-dash-tile-fg: var(--dash-tile-fg);
+  --color-dash-online: var(--dash-online);
+  --color-dash-tint-mint: var(--dash-tint-mint);
+  --color-dash-tint-rose: var(--dash-tint-rose);
+  --color-dash-tint-peach: var(--dash-tint-peach);
+  --color-dash-tint-sky: var(--dash-tint-sky);
+}
+
+@theme {
+  --color-dash-sun: #fbbf24; /* theme-toggle icon */
+  --spacing-rail: 5rem; /* dashboard icon rail width */
+  --spacing-menu: 15rem; /* dashboard menu panel width */
+
+  /*
+   * Sidebar text sizes. The user asked for the sidebar to match the live dashboard exactly, and two of these are
+   * smaller than the regular scale (--text-eyebrow is 11px), so they are their own tokens: `text-rail-label` etc.
+   */
+  --text-rail-label: 0.4375rem; /* 7px uppercase rail captions */
+  --text-rail-label--line-height: 0.625rem;
+  --text-menu-label: 0.625rem; /* 10px section labels (Custom Dashboard, My Purchases, ...) */
+  --text-menu-label--line-height: 1rem;
+  --text-menu-home: 0.8125rem; /* 13px primary "Home" link */
+  --text-menu-home--line-height: 1.25rem;
+  --text-menu-link: 0.875rem; /* 14px menu links */
+  --text-menu-link--line-height: 1.25rem;
+  --text-menu-sub: 0.75rem; /* 12px sidebar sub-links (My Dashboard, My Alerts, Industry Reports, ...) */
+  --text-menu-sub--line-height: 1.25rem;
+  --text-menu-title: 0.875rem; /* 14px menu header title */
+  /* Compact list rows (the "Latest Reports" titles): production's narrower font fits ~100 characters on one line at 14px; Inter needs 13px for the same. */
+  --text-list-row: 0.8125rem;
+  --text-list-row--line-height: 1.25rem;
+}
+
+/* Faint grid texture for dark panels; line colour is a token with opacity, never a literal. */
+@utility bg-grid {
+  background-image:
+    linear-gradient(to right, --alpha(var(--color-white) / 6%) 1px, transparent 1px),
+    linear-gradient(to bottom, --alpha(var(--color-white) / 6%) 1px, transparent 1px);
+  background-size: var(--spacing-grid) var(--spacing-grid);
+}
+
+/*
+ * Vertical density tokens. Spacing/control height grow with the window HEIGHT so auth screens stay on one
+ * viewport (no page scroll) on short laptops yet breathe on tall screens. Below lg the page may scroll,
+ * so it uses the roomiest values. Use via `gap-(--density-gap)`, `h-(--density-control-h)`, etc.
+ */
+:root {
+  --density-gap: 1rem; /* between form rows */
+  --density-control-h: 2.75rem; /* inputs, buttons, captcha controls */
+  --density-section: 1.25rem; /* logo -> heading -> form */
+  --density-card-py: 1.5rem; /* card top/bottom padding (lg+) */
+  --density-max-h: 47.5rem; /* max card height (lg+) */
+}
+@media (min-width: 62rem) {
+  :root {
+    --density-gap: 0.5rem;
+    --density-control-h: 2.5rem;
+    --density-section: 0.75rem;
+  }
+}
+@media (min-width: 62rem) and (min-height: 47.5rem) {
+  :root {
+    --density-gap: 0.875rem;
+    --density-control-h: 2.625rem;
+    --density-section: 1.25rem;
+    --density-card-py: 2rem;
+    --density-max-h: 50rem;
+  }
+}
+@media (min-width: 62rem) and (min-height: 56rem) {
+  :root {
+    --density-gap: 1.25rem;
+    --density-control-h: 2.75rem;
+    --density-section: 1.75rem;
+    --density-card-py: 3rem;
+    --density-max-h: 56rem;
+  }
+}
+
+/* Thin, low-key scrollbar for lists inside cards (product search panel). */
+@utility scrollbar-soft {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(0 0 0 / 22%) transparent;
+}
+
+/* Hide scrollbars on safety-net scroll areas (content never shifts; scrolling still works). */
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-white font-sans text-base leading-[1.7] text-body antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-heading leading-[1.2] tracking-[-0.5px] text-ink;
+  }
+}
