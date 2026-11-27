@@ -21,4 +21,4 @@ npm run build          # production build of the client
 
 ## Branches
 
-`main` is the branch Vercel deploys.
+Work happens on `abhishek_dev`; after checking it, it is promoted to `main`, which Vercel deploys.

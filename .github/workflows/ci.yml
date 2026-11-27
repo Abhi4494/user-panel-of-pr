@@ -1,7 +1,7 @@
 name: CI
 on:
   push:
-    branches: [ankush, main]
+    branches: [abhishek_dev, main]
   pull_request:
     branches: [main]
 concurrency:
