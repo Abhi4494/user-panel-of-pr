@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    { "source": "/panel-assets/:path*", "destination": "/:path*" },
+    { "source": "/api/:path*", "destination": "https://api.claight.net/procurement_resource_api/api/:path*" },
+    { "source": "/uploaded-files/:path*", "destination": "https://api.claight.net/procurement_resource_api/uploaded-files/:path*" },
+    { "source": "/((?!api/|uploaded-files/|panel-assets/).*)", "destination": "/index.html" }
+  ]
+}
